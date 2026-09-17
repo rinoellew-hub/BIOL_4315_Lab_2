@@ -27,3 +27,13 @@ plot(pressure)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Long read QC
+
+````{r summary_exercise}
+conda install filtlong 
+
+filtlong -p 75 data/ERR1539006.fastq.gz > outputs/filtered_ERR1539006.fastq.gz
+
+sequali --outdir outputs/flt_sequali_reports outputs/filtered_ERR1539006.fastq.gz
+````
