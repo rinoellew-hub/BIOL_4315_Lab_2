@@ -3,27 +3,66 @@ title: "BIOL_4315_report_RW"
 output: html_document
 date: "2026-09-16"
 ---
+## Long read QC
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+3. 
+````{r summary_exercise, eval = FALSE }
+conda install filtlong 
+````
+
+4. 
+````{r sequali_best, eval = FALSE}
+filtlong -p 0.75 data/ERR1539006.fastq.gz | gzip > outputs/filtered_ERR1539006.fastq.gz
+````
+
+5. 
+````{r sequali_filtfile, eval = FALSE}
+sequali --outdir outputs/sequali_outputs outputs/filtered_ERR1539006.fastq.gz
+````
+
+6. Given the sanity check points and the reports, we can say that this sequencing run post filtering is of good quality with both N90 and N50 containing longer read lengths. We also get a more intact per sequence quality score post filtering and an overall greater amount of both sequence length and number of reads per on the distribution graph. While the quality of the results are good, we could potentially filter the data to then use it for downstream analysis. 
+
+8. 
+````{r genome_seq, eval = FALSE}
+wget -nc -P data/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR112/040/ERR11203340/ERR11203340_1.fastq.gz
+
+wget -nc -P data/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR112/040/ERR11203340/ERR11203340_2.fastq.gz
+````
+
+9. 
+````{r, , eval = FALSE}
+library(Rqc)
+
+fastq_folder <- "data/"
+
+qc_files <- rqc(fastq_folder,
+                pattern = "_[12]\\.fastq.gz", 
+                openBrowser = FALSE,
+                outdir = "outputs/") 
+````
+9.a
+````{r cycleQP , eval = FALSE}
+rqcCycleQualityPlot(qc_files)
+````
+Based on the results, where we see the quality score drop below 2 is around the 26th cycle in the first fastq file and around the 96th cycle in the second file. 
+9.b
+```{r cycleBaseCallsPlot , eval = FALSE}
+rqcCycleBaseCallsPlot(qc_files)
 ```
+Based on the given result, we see no percentage of N in either fastq file. 
+9.c 
+````{r readFrequencyPlot , eval = FALSE}
+rqcReadFrequencyPlot(qc_files)
+````
+Based on the plot the level of redundancy of most seqs have exactly one read at >40% each. 
+10. 
+````{r trimBases , eval = FALSE}
+library(QuasR)
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+fastqFiles = c("data/ERR11203340_1.fastq.gz", "data/ERR11203340_2.fastq.gz")
+outputFiles = c("outputs/trimmed_ERR11203340_1.fastq.gz", "outputs/trimmed_ERR11203340_2.fastq.gz")
+QuasR::preprocessReads(filename = fastqFiles,
+                       outputFilename = outputFiles, 
+                       trucateRightQuality = 20 
+                        ) 
+````
